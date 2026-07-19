@@ -1,12 +1,11 @@
 {
-  "name": "AstraX",
+  "name": "AstraX - Futuristic AI",
   "short_name": "AstraX",
-  "description": "Futuristic Mobile AI Companion",
+  "description": "Your personal futuristic AI companion",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0a0a1f",
   "theme_color": "#00ffcc",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "https://picsum.photos/id/1015/192/192",
