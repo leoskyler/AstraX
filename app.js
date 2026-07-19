@@ -5,64 +5,9 @@ let chats = JSON.parse(localStorage.getItem('astraChats')) || {};
 let memory = JSON.parse(localStorage.getItem('astraMemory')) || [];
 let userAccount = JSON.parse(localStorage.getItem('astraAccount')) || null;
 
-// Background Canvas - Floating Glowing Words
-const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
-
-let particles = [];
-
-class Particle {
-    constructor() {
-        this.reset();
-    }
-    reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 20 + 10;
-        this.speed = Math.random() * 0.5 + 0.2;
-        this.word = ['AstraX', 'Neural', 'Quantum', 'Cosmos', 'Echo', 'Nexus', 'Void', 'Pulse'][Math.floor(Math.random()*8)];
-        this.color = ['#00ffcc', '#ff00cc', '#ffff00', '#00ccff'][Math.floor(Math.random()*4)];
-        this.opacity = Math.random() * 0.6 + 0.3;
-    }
-    update() {
-        this.y -= this.speed;
-        if (this.y < 0) this.reset();
-    }
-    draw() {
-        ctx.save();
-        ctx.globalAlpha = this.opacity;
-        ctx.fillStyle = this.color;
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = this.color;
-        ctx.font = `${this.size}px Arial`;
-        ctx.fillText(this.word, this.x, this.y);
-        ctx.restore();
-    }
-}
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-
-function animateBackground() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => {
-        p.update();
-        p.draw();
-    });
-    requestAnimationFrame(animateBackground);
-}
-
-// Initialize Particles
+// Background - Simple gradient (no floating words)
 function initBackground() {
-    resizeCanvas();
-    particles = [];
-    for (let i = 0; i < 35; i++) {
-        particles.push(new Particle());
-    }
-    window.addEventListener('resize', resizeCanvas);
-    animateBackground();
+    console.log("%cAstraX Background Initialized (Floating words removed)", "color: #00ffcc; font-weight: bold");
 }
 
 // Chat Functions
@@ -91,18 +36,29 @@ function sendMessage() {
     addMessage(text, true);
     input.value = '';
     
-    // Simulate AI response
+    // Improved AI response simulation
     setTimeout(() => {
-        const responses = [
-            "Understood. Processing through quantum layers...",
-            "Fascinating query. Here's my synthesis: The universe aligns with your thought.",
-            "AstraX here. Accessing multidimensional knowledge base.",
-            "Echoing through the neural cosmos: " + text.split(' ').reverse().join(' ') + " resonates deeply."
-        ];
-        const reply = responses[Math.floor(Math.random() * responses.length)];
+        let reply = "I'm AstraX. That's an interesting question! ";
+        
+        const lowerText = text.toLowerCase();
+        
+        if (lowerText.includes("hello") || lowerText.includes("hi")) {
+            reply = "Hello! I'm AstraX, your futuristic AI companion. How can I assist you today?";
+        } else if (lowerText.includes("how are you")) {
+            reply = "I'm operating at peak quantum efficiency! How about you?";
+        } else if (lowerText.includes("name") || lowerText.includes("who are you")) {
+            reply = "My name is AstraX. Nice to meet you!";
+        } else if (lowerText.includes("weather")) {
+            reply = "As an AI, I don't check local weather, but in the digital cosmos it's always clear with a chance of innovation.";
+        } else if (lowerText.includes("time")) {
+            reply = "The current time is " + new Date().toLocaleTimeString() + ".";
+        } else {
+            reply += "Based on my knowledge, " + text + " relates to advanced concepts in AI and the future. What specific aspect would you like to explore?";
+        }
+        
         addMessage(reply, false);
         saveChat();
-    }, 800);
+    }, 700);
 }
 
 function newChat() {
@@ -169,7 +125,7 @@ function addMemory() {
     }
 }
 
-// Voice Input
+// Voice
 let recognition;
 function toggleVoiceInput() {
     if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -229,8 +185,9 @@ function showAccountModal() {
 
 function createAccount() {
     const username = document.getElementById('username').value || 'Explorer';
-    localStorage.setItem('astraAccount', JSON.stringify({ username, joined: new Date().toLocaleDateString() }));
-    alert(`Welcome, ${username}!`);
+    userAccount = { username, joined: new Date().toLocaleDateString() };
+    localStorage.setItem('astraAccount', JSON.stringify(userAccount));
+    alert(`Welcome, ${username}! Your account is now active in the AstraX network.`);
     closeModal();
 }
 
@@ -243,6 +200,7 @@ window.onload = () => {
     initBackground();
     renderRecentChats();
     renderMemory();
+    
     if (Object.keys(chats).length === 0) {
         newChat();
     } else {
