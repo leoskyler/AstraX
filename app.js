@@ -5,12 +5,10 @@ let chats = JSON.parse(localStorage.getItem('astraChats')) || {};
 let memory = JSON.parse(localStorage.getItem('astraMemory')) || [];
 let userAccount = JSON.parse(localStorage.getItem('astraAccount')) || null;
 
-// Background - Simple gradient (no floating words)
 function initBackground() {
-    console.log("%cAstraX Background Initialized (Floating words removed)", "color: #00ffcc; font-weight: bold");
+    console.log("%cAstraX Initialized", "color:#00ffcc;font-weight:bold");
 }
 
-// Chat Functions
 function addMessage(text, isUser) {
     const messages = document.getElementById('chat-messages');
     const msgDiv = document.createElement('div');
@@ -18,14 +16,6 @@ function addMessage(text, isUser) {
     msgDiv.textContent = text;
     messages.appendChild(msgDiv);
     messages.scrollTop = messages.scrollHeight;
-    
-    if (!isUser) {
-        if (Math.random() > 0.7) {
-            memory.push(text.substring(0, 60) + '...');
-            localStorage.setItem('astraMemory', JSON.stringify(memory));
-            renderMemory();
-        }
-    }
 }
 
 function sendMessage() {
@@ -36,26 +26,17 @@ function sendMessage() {
     addMessage(text, true);
     input.value = '';
     
-    // Improved AI response simulation
     setTimeout(() => {
         let reply = "I'm AstraX. That's an interesting question! ";
+        const lower = text.toLowerCase();
         
-        const lowerText = text.toLowerCase();
-        
-        if (lowerText.includes("hello") || lowerText.includes("hi")) {
-            reply = "Hello! I'm AstraX, your futuristic AI companion. How can I assist you today?";
-        } else if (lowerText.includes("how are you")) {
-            reply = "I'm operating at peak quantum efficiency! How about you?";
-        } else if (lowerText.includes("name") || lowerText.includes("who are you")) {
-            reply = "My name is AstraX. Nice to meet you!";
-        } else if (lowerText.includes("weather")) {
-            reply = "As an AI, I don't check local weather, but in the digital cosmos it's always clear with a chance of innovation.";
-        } else if (lowerText.includes("time")) {
-            reply = "The current time is " + new Date().toLocaleTimeString() + ".";
-        } else {
-            reply += "Based on my knowledge, " + text + " relates to advanced concepts in AI and the future. What specific aspect would you like to explore?";
-        }
-        
+        if (lower.includes("hello") || lower.includes("hi")) reply = "Hello! I'm AstraX, your futuristic AI companion. How can I assist you today?";
+        else if (lower.includes("how are you")) reply = "I'm operating at peak quantum efficiency! How about you?";
+        else if (lower.includes("name") || lower.includes("who are you")) reply = "My name is AstraX. Nice to meet you!";
+        else if (lower.includes("weather")) reply = "In the digital cosmos it's always clear with a chance of innovation.";
+        else if (lower.includes("time")) reply = "The current time is " + new Date().toLocaleTimeString() + ".";
+        else reply += "Based on my knowledge, " + text + " relates to advanced concepts in AI and the future.";
+
         addMessage(reply, false);
         saveChat();
     }, 700);
@@ -108,7 +89,7 @@ function renderRecentChats() {
 function renderMemory() {
     const container = document.getElementById('memory-list');
     container.innerHTML = '';
-    memory.slice(0, 6).forEach((mem) => {
+    memory.forEach(mem => {
         const item = document.createElement('div');
         item.className = 'memory-item';
         item.textContent = mem;
@@ -125,7 +106,6 @@ function addMemory() {
     }
 }
 
-// Voice
 let recognition;
 function toggleVoiceInput() {
     if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -133,61 +113,49 @@ function toggleVoiceInput() {
         return;
     }
     recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById('user-input').value = transcript;
+    recognition.onresult = (e) => {
+        document.getElementById('user-input').value = e.results[0][0].transcript;
         sendMessage();
     };
     recognition.start();
 }
 
-// File Upload
 function uploadFile() {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*, .pdf, .txt';
+    input.accept = 'image/*,.pdf,.txt';
     input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            addMessage(`📁 Uploaded: ${file.name}`, true);
-            setTimeout(() => {
-                addMessage(`Analyzing ${file.name}... It contains visionary data!`, false);
-            }, 600);
+        if (e.target.files[0]) {
+            addMessage(`📁 Uploaded: ${e.target.files[0].name}`, true);
+            setTimeout(() => addMessage("Analyzing file... Visionary data detected!", false), 600);
         }
     };
     input.click();
 }
 
-// Image Generation
 function generateImage() {
     const prompt = prompt("Describe the image you want AstraX to generate:");
     if (!prompt) return;
     const preview = document.getElementById('image-preview');
-    preview.innerHTML = `
-        <p>Generating futuristic image: ${prompt}</p>
-        <img src="https://picsum.photos/id/${Math.floor(Math.random()*1000)}/600/400" alt="Generated Image">
-        <button onclick="this.parentElement.innerHTML='Image saved to gallery!'">Save</button>
-    `;
+    preview.innerHTML = `<p>Generating: \( {prompt}</p><img src="https://picsum.photos/id/ \){Math.floor(Math.random()*1000)}/600/400" alt="AI Image">`;
     addMessage(`🖼️ Generated image for: ${prompt}`, false);
 }
 
 function editImage() {
-    const prompt = prompt("How would you like to edit the latest image?");
-    if (!prompt) return;
-    const preview = document.getElementById('image-preview');
-    preview.innerHTML += `<p>✨ Edited: ${prompt}</p>`;
+    const prompt = prompt("How would you like to edit the image?");
+    if (prompt) {
+        document.getElementById('image-preview').innerHTML += `<p>✨ Edited: ${prompt}</p>`;
+    }
 }
 
-// Account
 function showAccountModal() {
     document.getElementById('account-modal').style.display = 'block';
 }
 
 function createAccount() {
     const username = document.getElementById('username').value || 'Explorer';
-    userAccount = { username, joined: new Date().toLocaleDateString() };
-    localStorage.setItem('astraAccount', JSON.stringify(userAccount));
-    alert(`Welcome, ${username}! Your account is now active in the AstraX network.`);
+    localStorage.setItem('astraAccount', JSON.stringify({username}));
+    alert(`Welcome, ${username}!`);
     closeModal();
 }
 
@@ -195,15 +163,10 @@ function closeModal() {
     document.getElementById('account-modal').style.display = 'none';
 }
 
-// Init
 window.onload = () => {
     initBackground();
     renderRecentChats();
     renderMemory();
-    
-    if (Object.keys(chats).length === 0) {
-        newChat();
-    } else {
-        loadChat(Object.keys(chats)[0]);
-    }
+    if (Object.keys(chats).length === 0) newChat();
+    else loadChat(Object.keys(chats)[0]);
 };
